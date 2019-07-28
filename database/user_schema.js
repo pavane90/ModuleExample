@@ -11,10 +11,6 @@ console.log("UserSchema 정의함");
 UserSchema.static("findById", function(id, callback) {
   return this.find({ id: id }, callback);
 });
-/*
-      UserSchema.statics.findById = function(id, callback) {
-          return this.find({id:id}, callback);
-      }*/
 
 UserSchema.static("findAll", function(callback) {
   return this.find({}, callback);
