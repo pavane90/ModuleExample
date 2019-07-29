@@ -3,6 +3,8 @@ var crypto = require("crypto");
 var Schema = {};
 
 Schema.createSchema = function(mongoose) {
+  console.log("createSchema 호출됨.");
+
   var UserSchema = mongoose.Schema({
     id: { type: String, required: true, unique: true, default: "" },
     hashed_password: { type: String, required: true, default: "" },
