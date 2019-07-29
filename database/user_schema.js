@@ -1,7 +1,9 @@
+var crypto = require("crypto");
+
 var Schema = {};
 
-Schema.createSchema = function() {
-  UserSchema = mongoose.Schema({
+Schema.createSchema = function(mongoose) {
+  var UserSchema = mongoose.Schema({
     id: { type: String, required: true, unique: true, default: "" },
     hashed_password: { type: String, required: true, default: "" },
     salt: { type: String, required: true },
@@ -57,4 +59,8 @@ Schema.createSchema = function() {
   UserSchema.static("findAll", function(callback) {
     return this.find({}, callback);
   });
+
+  return UserSchema;
 };
+
+module.exports = Schema; //module에 객체할당
