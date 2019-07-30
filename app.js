@@ -22,35 +22,6 @@ var database;
 var UserSchema;
 var UserModel;
 
-function connectDB() {
-  var databaseUrl = "mongodb://localhost:27017/local";
-
-  mongoose.Promise = global.Promise;
-  mongoose.connect(databaseUrl);
-  database = mongoose.connection;
-
-  database.on("open", function() {
-    console.log("데이터베이스에 연결됨 : " + databaseUrl);
-
-    createUserShcema(database);
-  });
-
-  database.on("disconnected", function() {
-    console.log("데이터베이스 연결 끊어짐");
-  });
-
-  database.on("error", console.error.bind(console, "mongoose 연결에러"));
-}
-
-function createUserShcema(database) {
-  database.UserSchema = require("./database/user_schema").createSchema(
-    mongoose
-  );
-
-  database.UserModel = mongoose.model("users3", database.UserSchema); //UserSchema와 user를 연결
-  console.log("usermodel 정의함");
-}
-
 var app = express(); // express server object
 
 app.set("port", process.env.PORT || 3000); // configure server port
@@ -69,6 +40,37 @@ app.use(
     saveUninitialized: true
   })
 ); // express-Session
+
+function connectDB() {
+  var databaseUrl = "mongodb://localhost:27017/local";
+
+  mongoose.Promise = global.Promise;
+  mongoose.connect(databaseUrl);
+  database = mongoose.connection;
+
+  database.on("open", function() {
+    console.log("데이터베이스에 연결됨 : " + databaseUrl);
+
+    createUserShcema(database);
+  });
+
+  database.on("disconnected", function() {
+    console.log("데이터베이스 연결 끊어짐");
+  });
+
+  database.on("error", console.error.bind(console, "mongoose 연결에러"));
+
+  app.set("database", database);
+}
+
+function createUserShcema(database) {
+  database.UserSchema = require("./database/user_schema").createSchema(
+    mongoose
+  );
+
+  database.UserModel = mongoose.model("users3", database.UserSchema); //UserSchema와 user를 연결
+  console.log("usermodel 정의함");
+}
 
 var router = express.Router();
 

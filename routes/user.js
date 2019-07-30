@@ -5,6 +5,7 @@ var login = function(req, res) {
   var paramPassword = req.body.password || req.query.password;
   console.log("요청 파라미터 : " + paramId + ", " + paramPassword);
 
+  var database = req.app.get("database");
   if (database) {
     authUser(database, paramId, paramPassword, function(err, docs) {
       if (err) {
@@ -46,7 +47,7 @@ var adduser = function(req, res) {
   console.log(
     "요청 파라미터 : " + paramId + ", " + paramPassword + ", " + paramName
   );
-
+  var database = req.app.get("database");
   if (database) {
     addUser(database, paramId, paramPassword, paramName, function(err, result) {
       if (err) {
@@ -80,8 +81,9 @@ var adduser = function(req, res) {
 var listuser = function(req, res) {
   console.log("/process/listuser 라우팅 함수 호출됨");
   // 사용자 리스트 전체 출력
+  var database = req.app.get("database");
   if (database) {
-    UserModel.findAll(function(err, results) {
+    database.UserModel.findAll(function(err, results) {
       //해당 스키마의 내용 전부 가져오기
       if (err) {
         console.log("에러가 발생했습니다" + err);
@@ -118,6 +120,69 @@ var listuser = function(req, res) {
     res.write("<h1>데이터베이스 연결에러</h1>");
     res.end();
   }
+};
+
+var authUser = function(db, id, password, callback) {
+  console.log("authuser 호출됨" + id + ", " + password);
+
+  db.UserModel.findById(id, function(err, docs) {
+    if (err) {
+      callback(err, null);
+      return;
+    }
+    console.log("id %s로 검색한 결과", id);
+    if (docs.length > 0) {
+      var user = new UserModel({ id: id });
+      var authenticated = user.authenticate(
+        password,
+        docs[0]._doc.salt,
+        docs[0]._doc.hashed_password
+      );
+
+      if (authenticated) {
+        console.log("비밀번호 일치함");
+        callback(null, docs);
+      } else {
+        console.log("비밀번호 일치하지 않음");
+        callback(null, null);
+      }
+    } else {
+      console.log("일치하는 사용자가 없음");
+      callback(null, null);
+    }
+  });
+  /*
+  UserModel.find({ id: id, password: password }, function(err, docs) {
+    if (err) {
+      console.log("authUser에서 에러발생");
+      callback(err, null);
+      return;
+    }
+    if (docs.length > 0) {
+      console.log("일치하는 사용자를 찾음");
+      callback(null, docs);
+    } else {
+      console.log("일치하는 사용자를 찾지못함");
+      callback(null, null);
+    }
+  });
+  */
+};
+
+var addUser = function(database, id, password, name, callback) {
+  console.log("adduser 호출");
+
+  var user = new database.UserModel({ id: id, password: password, name: name });
+
+  user.save(function(err) {
+    if (err) {
+      console.log("데이터 입력중 에러발생");
+      callback(err, null);
+      return;
+    }
+    console.log("사용자 데이터 추가함" + id);
+    callback(null, user);
+  });
 };
 
 module.exports.login = login;
