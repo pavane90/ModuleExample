@@ -82,69 +82,6 @@ router.route("/process/listuser").post(user.listuser);
 
 app.use("/", router);
 
-var authUser = function(db, id, password, callback) {
-  console.log("authuser 호출됨" + id + ", " + password);
-
-  UserModel.findById(id, function(err, docs) {
-    if (err) {
-      callback(err, null);
-      return;
-    }
-    console.log("id %s로 검색한 결과", id);
-    if (docs.length > 0) {
-      var user = new UserModel({ id: id });
-      var authenticated = user.authenticate(
-        password,
-        docs[0]._doc.salt,
-        docs[0]._doc.hashed_password
-      );
-
-      if (authenticated) {
-        console.log("비밀번호 일치함");
-        callback(null, docs);
-      } else {
-        console.log("비밀번호 일치하지 않음");
-        callback(null, null);
-      }
-    } else {
-      console.log("일치하는 사용자가 없음");
-      callback(null, null);
-    }
-  });
-  /*
-  UserModel.find({ id: id, password: password }, function(err, docs) {
-    if (err) {
-      console.log("authUser에서 에러발생");
-      callback(err, null);
-      return;
-    }
-    if (docs.length > 0) {
-      console.log("일치하는 사용자를 찾음");
-      callback(null, docs);
-    } else {
-      console.log("일치하는 사용자를 찾지못함");
-      callback(null, null);
-    }
-  });
-  */
-};
-
-var addUser = function(database, id, password, name, callback) {
-  console.log("adduser 호출");
-
-  var user = new UserModel({ id: id, password: password, name: name });
-
-  user.save(function(err) {
-    if (err) {
-      console.log("데이터 입력중 에러발생");
-      callback(err, null);
-      return;
-    }
-    console.log("사용자 데이터 추가함" + id);
-    callback(null, user);
-  });
-};
-
 var errorHandler = expressErrorHandler({
   ststic: {
     "404": "./public/404.html"
