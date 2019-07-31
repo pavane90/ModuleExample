@@ -14,6 +14,8 @@ var expressErrorHandler = require("express-error-handler");
 
 var user = require("./routes/user");
 
+var config = require("./config");
+
 //암호화 모듈
 var crypto = require("crypto");
 //mongoose 사용
@@ -24,7 +26,8 @@ var UserModel;
 
 var app = express(); // express server object
 
-app.set("port", process.env.PORT || 3000); // configure server port
+console.log("config.server_port -> " + config.server_port);
+app.set("port", config.server_port || 3000); // configure server port
 app.use("/public", static(path.join(__dirname, "public"))); //폴더의 패스를 static으로 불러올 수 있다.
 
 // post데이터 사용
@@ -42,10 +45,8 @@ app.use(
 ); // express-Session
 
 function connectDB() {
-  var databaseUrl = "mongodb://localhost:27017/local";
-
   mongoose.Promise = global.Promise;
-  mongoose.connect(databaseUrl);
+  mongoose.connect(config.db_url);
   database = mongoose.connection;
 
   database.on("open", function() {
